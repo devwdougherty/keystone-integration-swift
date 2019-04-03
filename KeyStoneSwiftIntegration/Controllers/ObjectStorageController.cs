@@ -10,7 +10,7 @@ namespace KeyStoneSwiftIntegration.Controllers
 {
     public class ObjectStorageController : Controller
     {
-        KeyStoneService keyStoneService = new KeyStoneService();
+        KeyStone keyStoneService = new KeyStone();
 
         SwiftObjectStorage swiftObjectStorage = new SwiftObjectStorage();
 
@@ -18,7 +18,7 @@ namespace KeyStoneSwiftIntegration.Controllers
         {
             SwiftConfig swiftConfig = keyStoneService.Authenticate();
 
-            
+            swiftObjectStorage.CreateObject(swiftConfig, "objectName", "C:/Temp");
 
             return View();
         }

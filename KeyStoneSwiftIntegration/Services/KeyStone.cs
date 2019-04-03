@@ -7,7 +7,7 @@ using System.Text;
 
 namespace KeyStoneSwiftIntegration.Services
 {
-    public class KeyStoneService
+    public class KeyStone
     {
         /// <summary>
         /// Your openstack address.
