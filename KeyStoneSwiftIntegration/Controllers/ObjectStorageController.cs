@@ -18,7 +18,14 @@ namespace KeyStoneSwiftIntegration.Controllers
         {
             SwiftConfig swiftConfig = keyStoneService.Authenticate();
 
-            swiftObjectStorage.CreateObject(swiftConfig, "objectName", "C:/Temp");
+            swiftObjectStorage.CreateObject(swiftConfig, "someVideo", "C:/Temp");
+            swiftObjectStorage.GetVideoFile(swiftConfig, "someVideo");
+
+            List<String> videosToBeDeleted = new List<String>();
+
+            videosToBeDeleted.Add("someVideo");
+
+            swiftObjectStorage.DeleteVideo(swiftConfig, videosToBeDeleted);
 
             return View();
         }

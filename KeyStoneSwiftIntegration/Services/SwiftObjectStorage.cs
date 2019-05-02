@@ -38,9 +38,9 @@ namespace KeyStoneSwiftIntegration.Services
             fullObjectName = RemoveLeadingSlash(fullObjectName);
 
             IRestRequest request = GetRequest(swiftConfig.StorageUrl + "/" + containerName + "/" + objectName, Method.PUT,  null, swiftConfig.AuthToken);
-            request.AddHeader("Content-Type", "multpart/form-data");
 
-            request.AddFile(objectName, fullObjectName);
+            // In this case: a video file.
+            request.AddParameter(objectName, File.ReadAllBytes(fullObjectName), "video/x-msvideo", ParameterType.RequestBody);
             
             IRestResponse response = restClient.Execute(request);
 
@@ -50,6 +50,66 @@ namespace KeyStoneSwiftIntegration.Services
                 Debug.Print("Error in creating object. Error:" + response.ToString());
                 throw new Exception("Error in creating object. Error:" + response.ToString());
             }
+        }
+
+        /// <summary>
+        ///  Get a file from Swift Object Storage.
+        /// </summary>
+        /// <param name="videoName"></param>
+        /// <returns></returns>
+        public Stream GetVideoFile(SwiftConfig swiftConfig, string videoName)
+        {
+            RestClient restClient = GetRestClient();
+
+            IRestRequest request = GetRequest(swiftConfig.StorageUrl + "/" + containerName + "/" + videoName, Method.GET, null, swiftConfig.AuthToken);
+
+            IRestResponse response = restClient.Execute(request);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                Stream fs = new MemoryStream(response.RawBytes);
+                Debug.Print("Video get from Swift: " + videoName);
+                return fs;
+            }
+            else
+            {
+                Debug.Print("Error in get object. Error:" + response.ToString());
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Delete a range of videos of Swift Object Storage
+        /// </summary>
+        /// <param name="listVideoObject">List of videos to be deleted</param>
+        public List<String> DeleteVideo(SwiftConfig swiftConfig, List<String> listVideoObject)
+        {
+            RestClient restClient = GetRestClient();
+
+            List<String> succeededDeletes = new List<String>();
+
+            foreach (String videoName in listVideoObject)
+            {
+                IRestRequest request = GetRequest(swiftConfig.StorageUrl + "/" + containerName + "/" + videoName, Method.DELETE, null, swiftConfig.AuthToken);
+
+                IRestResponse response = restClient.Execute(request);
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    succeededDeletes.Add(videoName);
+                    Debug.Print("Video: " + videoName + " deleted of Swift...");
+                }
+                else if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    Debug.Print("Video: " + videoName + " not found...");
+                }
+                else
+                {
+                    Debug.Print("Video: " + videoName + " deletion failed...");
+                }
+            }
+
+            return succeededDeletes;
         }
 
         /// <summary>
